@@ -1,0 +1,512 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>My Library v2.2.1</title>
+<style>
+:root{
+  --bg:#101010;--card:#1b1b1b;--soft:#242424;--line:#333;--text:#f4f4f4;--muted:#aaa;
+  --accent:#4f9f6f;--danger:#9b3b3b;--paper:#f6f0dd;--paperText:#1f1b16;
+}
+:root.light{
+  --bg:#f4f4f1;--card:#ffffff;--soft:#eeeeea;--line:#d8d8d2;--text:#151515;--muted:#666;
+  --accent:#2f8c5a;--danger:#b24b4b;--paper:#fff6dc;--paperText:#1f1b16;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+header{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.head{max-width:900px;margin:auto;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+h1{font-size:21px;margin:0}.wrap{max-width:900px;margin:auto;padding:16px}
+button{border:0;border-radius:14px;padding:11px 15px;background:var(--accent);color:white;font-weight:800;cursor:pointer}
+button.ghost{background:var(--soft);color:var(--text);border:1px solid var(--line)}
+button.danger{background:var(--danger)}button.small{padding:8px 10px;font-size:13px}
+input,textarea,select{width:100%;padding:13px;margin:7px 0 13px;border-radius:13px;border:1px solid var(--line);background:var(--card);color:var(--text)}
+textarea{min-height:92px;line-height:1.6}.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.lock{min-height:100vh;display:grid;place-items:center;padding:20px}.lockbox{width:100%;max-width:420px;background:var(--card);border:1px solid var(--line);border-radius:24px;padding:24px;text-align:center}
+.logo{font-size:42px}.hint{color:var(--muted);font-size:14px;line-height:1.6}.msg{color:#ff7878;min-height:24px;font-size:14px}
+.tabs{display:flex;gap:8px;overflow:auto;margin-bottom:14px}.tabs button{white-space:nowrap}
+.search{margin-bottom:14px}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:14px}
+.book{background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden;cursor:pointer}
+.cover{height:210px;background:var(--soft);display:flex;align-items:center;justify-content:center;color:var(--muted);text-align:center}
+.cover img{width:100%;height:100%;object-fit:cover}.info{padding:12px}.title{font-weight:900;line-height:1.35}.meta{color:var(--muted);font-size:13px;margin-top:5px}.stars{color:#f4c64e;letter-spacing:1px}.fab{position:fixed;right:18px;bottom:18px;border-radius:999px;width:58px;height:58px;font-size:26px;box-shadow:0 10px 30px #0007}
+.page{display:none}.top{display:flex;gap:18px}.bigcover{width:38%;max-width:250px;border-radius:18px;overflow:hidden;background:var(--soft);min-height:320px}
+.bigcover img{width:100%;height:100%;object-fit:cover}.detailTitle{font-size:28px;line-height:1.25}.line{padding:12px 0;border-bottom:1px solid var(--line);color:var(--muted)}.line b{color:var(--text);margin-right:8px}
+.tags span{display:inline-block;background:var(--soft);border:1px solid var(--line);border-radius:999px;padding:8px 11px;margin:4px;font-size:13px;font-weight:800}
+section{margin-top:24px}h2{font-size:20px;margin:0 0 10px}.paper{background:var(--paper);color:var(--paperText);border-radius:17px;padding:18px;line-height:1.75;white-space:pre-line}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.statgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px}.stat{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px}.stat b{font-size:26px}.stat span{display:block;color:var(--muted);margin-top:6px}
+label{font-size:13px;color:var(--muted);font-weight:700}.preview{height:210px;border-radius:16px;border:1px dashed var(--line);background:var(--soft);display:grid;place-items:center;overflow:hidden;margin-bottom:12px}.preview img{width:100%;height:100%;object-fit:cover}
+.empty{color:var(--muted);text-align:center;padding:50px 10px}
+
+.toolgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.toolcard{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px}
+.toolpreview{min-height:260px;border-radius:16px;border:1px dashed var(--line);background:var(--soft);display:grid;place-items:center;overflow:hidden;margin:10px 0}
+.toolpreview img{width:100%;height:100%;object-fit:contain}
+.resultbox{background:var(--soft);border:1px solid var(--line);border-radius:14px;padding:12px;margin:8px 0 13px;white-space:pre-wrap;line-height:1.6}
+.progress{height:10px;background:var(--soft);border:1px solid var(--line);border-radius:999px;overflow:hidden;margin:8px 0}
+.progress span{display:block;height:100%;width:0%;background:var(--accent)}
+
+.filepick{
+  width:100%; min-height:58px; display:flex; align-items:center; justify-content:center; gap:8px;
+  border-radius:16px; padding:16px 18px; font-size:16px; font-weight:900;
+  background:var(--accent); color:white; border:0; cursor:pointer; margin:10px 0 6px;
+  -webkit-tap-highlight-color:transparent; touch-action:manipulation;
+}
+.filepick.ghostpick{background:var(--soft);color:var(--text);border:1px solid var(--line)}
+.filepick:active{transform:scale(.99)}
+.fileName{
+  min-height:26px; color:var(--muted); font-size:13px; line-height:1.5;
+  margin:0 0 12px; word-break:break-all;
+}
+.hiddenFile{position:absolute;left:-9999px;width:1px;height:1px;opacity:0;pointer-events:none}
+@media(max-width:560px){.filepick{min-height:62px;font-size:17px;border-radius:18px}}
+
+@media(max-width:760px){.toolgrid{grid-template-columns:1fr}}
+@media(max-width:560px){.row2{grid-template-columns:1fr}.top{display:block}.bigcover{width:100%;max-width:none;height:330px;margin-bottom:18px}.head{align-items:flex-start}.grid{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div id="lockPage" class="lock">
+  <div class="lockbox">
+    <div class="logo">📚</div>
+    <h1>My Library</h1>
+    <p id="lockDesc" class="hint"></p>
+    <input id="pin1" type="password" inputmode="numeric" maxlength="6" placeholder="PIN 4~6자리">
+    <input id="pin2" type="password" inputmode="numeric" maxlength="6" placeholder="PIN 확인" style="display:none">
+    <div class="msg" id="lockMsg"></div>
+    <button onclick="handlePin()" id="pinBtn">확인</button>
+    <button class="ghost small" onclick="resetAll()" style="margin-top:10px">PIN 초기화 / 전체 삭제</button>
+  </div>
+</div>
+
+<div id="app" style="display:none">
+<header>
+  <div class="head">
+    <h1 id="headTitle">My Library</h1>
+    <div class="actions" style="margin:0">
+      <button class="ghost small" onclick="showPage('extractor')">캡처입력</button>
+      <button class="ghost small" onclick="exportData()">백업</button>
+      <button class="ghost small" onclick="showPage('settings')">설정</button>
+      <button class="ghost small" onclick="lock()">잠금</button>
+    </div>
+  </div>
+</header>
+
+<div class="wrap page" id="list">
+  <div class="tabs">
+    <button onclick="setFilter('all')" id="tab-all">전체</button>
+    <button class="ghost" onclick="setFilter('읽고 싶어요')" id="tab-읽고 싶어요">읽고 싶어요</button>
+    <button class="ghost" onclick="setFilter('읽는 중')" id="tab-읽는 중">읽는 중</button>
+    <button class="ghost" onclick="setFilter('완독')" id="tab-완독">완독</button>
+    <button class="ghost" onclick="setFilter('favorite')" id="tab-favorite">인생작</button>
+    <button class="ghost" onclick="showPage('extractor')">캡처입력</button>
+    <button class="ghost" onclick="showPage('stats')">통계</button>
+  </div>
+  <input class="search" id="q" placeholder="제목, 작가, 태그, 메모 검색" oninput="renderList()">
+  <div class="grid" id="books"></div>
+  <button class="fab" onclick="openForm()">+</button>
+</div>
+
+<div class="wrap page" id="detail">
+  <button class="ghost" onclick="showPage('list')">← 목록</button>
+  <div id="detailBox"></div>
+</div>
+
+<div class="wrap page" id="form">
+  <button class="ghost" onclick="showPage('list')">← 취소</button>
+  <h2 id="formTitle">작품 추가</h2>
+  <label>표지 이미지 직접 업로드</label>
+  <div class="preview" id="preview">이미지 없음</div>
+  <button class="filepick ghostpick" type="button" onclick="document.getElementById('coverFile').click()">🖼️ 표지 이미지 선택하기</button>
+  <div class="fileName" id="coverFileName">선택된 파일 없음</div>
+  <input class="hiddenFile" id="coverFile" type="file" accept="image/*" onchange="loadImage(event)">
+  <div class="row2">
+    <div><label>제목</label><input id="title" placeholder="제목"></div>
+    <div><label>작가</label><input id="author" placeholder="작가"></div>
+  </div>
+  <div class="row2">
+    <div><label>카테고리</label><input id="category" placeholder="BL, 로판, 판타지 등"></div>
+    <div><label>상태</label><select id="status"><option>읽고 싶어요</option><option>읽는 중</option><option>완독</option></select></div>
+  </div>
+  <div class="row2">
+    <div><label>별점</label><select id="rating"><option value="5">★★★★★ 5</option><option value="4.5">★★★★½ 4.5</option><option value="4">★★★★ 4</option><option value="3.5">★★★½ 3.5</option><option value="3">★★★ 3</option><option value="2">★★ 2</option><option value="1">★ 1</option></select></div>
+    <div><label>완독/시작 날짜</label><input id="date" type="date"></div>
+  </div>
+  <div class="row2">
+    <div><label>재탕 횟수</label><input id="reread" type="number" min="0" placeholder="0"></div>
+    <div><label>인생작</label><select id="favorite"><option value="false">아니오</option><option value="true">예 ⭐</option></select></div>
+  </div>
+  <div class="row2">
+    <div><label>공/수 또는 남주/여주</label><input id="characters" placeholder="예: 여우공 / 호랑이수"></div>
+    <div><label>태그</label><input id="tags" placeholder="#현대판타지 #성장수"></div>
+  </div>
+  <label>줄거리</label><textarea id="summary" placeholder="줄거리"></textarea>
+  <label>명대사 / 공감 글귀</label><textarea id="quote" placeholder="인상 깊은 문장"></textarea>
+  <label>개인 감상 / 메모</label><textarea id="memo" placeholder="개인 감상"></textarea>
+  <div class="actions">
+    <button onclick="saveBook()">저장</button>
+    <button class="danger" id="deleteBtn" onclick="deleteBook()" style="display:none">삭제</button>
+  </div>
+</div>
+
+
+<div class="wrap page" id="extractor">
+  <button class="ghost" onclick="showPage('list')">← 목록</button>
+  <h2>캡처 입력 도우미</h2>
+  <p class="hint">리디북스/디리토 등 작품 소개 캡처를 올리면 OCR로 텍스트를 읽고, My Library 입력 항목으로 나눠줍니다. 결과는 꼭 확인 후 저장하세요.</p>
+  <div class="toolgrid">
+    <div class="toolcard">
+      <h2>1. 캡처 이미지</h2>
+      <div class="toolpreview" id="ocrPreview">이미지 없음</div>
+      <button class="filepick" type="button" onclick="document.getElementById('ocrFile').click()">📷 캡처 이미지 선택하기</button>
+      <div class="fileName" id="ocrFileName">선택된 파일 없음</div>
+      <input class="hiddenFile" id="ocrFile" type="file" accept="image/*" onchange="loadOcrImage(event)">
+      <div class="actions">
+        <button onclick="runOCR()">이미지에서 텍스트 추출</button>
+        <button class="ghost" onclick="parseOcrText()">텍스트 정리</button>
+      </div>
+      <div class="progress"><span id="ocrBar"></span></div>
+      <p class="hint" id="ocrStatus">이미지를 선택하거나 아래 원본 텍스트에 직접 붙여넣어도 됩니다.</p>
+      <label>추출된 원본 텍스트</label>
+      <textarea id="ocrText" style="min-height:280px" placeholder="OCR 결과 또는 직접 복사한 텍스트를 붙여넣으세요."></textarea>
+    </div>
+    <div class="toolcard">
+      <h2>2. 정리된 책 정보</h2>
+      <label>제목</label><input id="exTitle">
+      <label>작가</label><input id="exAuthor">
+      <label>카테고리</label><input id="exCategory">
+      <label>상태</label>
+      <select id="exStatus"><option>읽고 싶어요</option><option>읽는 중</option><option>완독</option></select>
+      <label>회차 / 분량</label><input id="exVolume" placeholder="예: 78화">
+      <label>공/수 또는 남주/여주</label><input id="exCharacters">
+      <label>태그</label><input id="exTags" placeholder="#피폐물 #오해">
+      <label>줄거리</label><textarea id="exSummary"></textarea>
+      <label>명대사 / 공감 글귀</label><textarea id="exQuote"></textarea>
+      <label>개인 메모</label><textarea id="exMemo"></textarea>
+      <div class="actions">
+        <button onclick="sendExtractToForm()">My Library 입력폼에 채우기</button>
+        <button class="ghost" onclick="copyExtractAll()">전체 정보 복사</button>
+      </div>
+      <p class="hint" id="extractMsg">입력폼에 채우기를 누르면 작품 추가 화면으로 이동하고, 추출된 내용이 자동 입력됩니다. 자동 저장은 하지 않습니다.</p>
+    </div>
+  </div>
+</div>
+
+<div class="wrap page" id="stats">
+  <button class="ghost" onclick="showPage('list')">← 목록</button>
+  <h2>통계</h2>
+  <div class="statgrid" id="statBox"></div>
+</div>
+
+<div class="wrap page" id="settings">
+  <button class="ghost" onclick="showPage('list')">← 목록</button>
+  <h2>설정</h2>
+  <section>
+    <label>테마</label>
+    <select id="theme" onchange="setTheme(this.value)">
+      <option value="dark">다크모드</option>
+      <option value="light">라이트모드</option>
+      <option value="system">시스템 설정 따라가기</option>
+    </select>
+  </section>
+  <section>
+    <h2>PIN 변경</h2>
+    <input id="newPin1" type="password" inputmode="numeric" maxlength="6" placeholder="새 PIN">
+    <input id="newPin2" type="password" inputmode="numeric" maxlength="6" placeholder="새 PIN 확인">
+    <button onclick="changePin()">PIN 변경</button>
+    <p class="hint" id="pinChangeMsg"></p>
+  </section>
+  <section>
+    <h2>백업 / 복원</h2>
+    <button onclick="exportData()">JSON 백업 다운로드</button>
+    <button class="ghost" onclick="shareBackup()" style="margin-top:8px">백업 파일 공유하기</button>
+    <button class="filepick ghostpick" type="button" onclick="document.getElementById('importFile').click()">📂 백업 파일 선택하기</button>
+    <div class="fileName" id="importFileName">선택된 파일 없음</div>
+    <input class="hiddenFile" id="importFile" type="file" accept="application/json,.json" onchange="importData(event)">
+    <p class="hint">기기 저장 방식이라 휴대폰 변경 전에 백업을 권장합니다. 복원 전에는 현재 데이터가 자동 백업됩니다.</p>
+  </section>
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<script>
+let ocrImageData = "";
+let books = JSON.parse(localStorage.getItem("booksV2")||"[]");
+let filter = "all", editId = null, currentCover = "";
+const $=id=>document.getElementById(id);
+
+function applyTheme(){
+  let t=localStorage.getItem("theme")||"dark";
+  if(t==="system"){document.documentElement.className = matchMedia("(prefers-color-scheme: light)").matches ? "light" : "";}
+  else document.documentElement.className = t==="light" ? "light" : "";
+  if($("theme")) $("theme").value=t;
+}
+applyTheme();
+function setTheme(t){localStorage.setItem("theme",t);applyTheme()}
+
+function boot(){
+  const pin=localStorage.getItem("pin");
+  $("lockDesc").innerText = pin ? "PIN을 입력하세요." : "처음 사용하시네요. 사용할 PIN 4~6자리를 설정하세요.";
+  $("pin2").style.display = pin ? "none" : "block";
+  $("pinBtn").innerText = pin ? "잠금 해제" : "PIN 설정";
+}
+function handlePin(){
+  const saved=localStorage.getItem("pin"), p1=$("pin1").value.trim(), p2=$("pin2").value.trim();
+  $("lockMsg").innerText="";
+  if(!saved){
+    if(!/^[0-9]{4,6}$/.test(p1)) return $("lockMsg").innerText="PIN은 숫자 4~6자리로 설정하세요.";
+    if(p1!==p2) return $("lockMsg").innerText="PIN 확인이 일치하지 않습니다.";
+    localStorage.setItem("pin",p1); unlock();
+  }else{
+    if(p1===saved) unlock(); else $("lockMsg").innerText="PIN이 일치하지 않습니다.";
+  }
+}
+function unlock(){ $("lockPage").style.display="none"; $("app").style.display="block"; showPage("list"); }
+function lock(){ $("app").style.display="none"; $("lockPage").style.display="grid"; $("pin1").value=""; $("pin2").value=""; boot(); }
+function resetAll(){
+  if(confirm("PIN과 모든 도서 데이터를 삭제할까요?")){localStorage.clear(); books=[]; location.reload();}
+}
+function changePin(){
+  const a=$("newPin1").value.trim(), b=$("newPin2").value.trim();
+  if(!/^[0-9]{4,6}$/.test(a)) return $("pinChangeMsg").innerText="PIN은 숫자 4~6자리여야 합니다.";
+  if(a!==b) return $("pinChangeMsg").innerText="PIN 확인이 일치하지 않습니다.";
+  localStorage.setItem("pin",a); $("pinChangeMsg").innerText="PIN이 변경되었습니다.";
+  $("newPin1").value=$("newPin2").value="";
+}
+
+function save(){localStorage.setItem("booksV2",JSON.stringify(books))}
+function stars(n){let full=Math.floor(n), half=n%1? "½":""; return "★".repeat(full)+half+"☆".repeat(Math.max(0,5-Math.ceil(n)))}
+function showPage(id){
+  document.querySelectorAll(".page").forEach(p=>p.style.display="none");
+  $(id).style.display="block";
+  $("headTitle").innerText = id==="list"?"My Library": id==="settings"?"설정": id==="stats"?"통계": id==="form"?"작품 입력": id==="extractor"?"캡처 입력":"작품 상세";
+  if(id==="list") renderList();
+  if(id==="stats") renderStats();
+}
+function setFilter(f){filter=f; renderList()}
+function renderList(){
+  ["all","읽고 싶어요","읽는 중","완독","favorite"].forEach(t=>{let el=$("tab-"+t); if(el) el.className=t===filter?"":"ghost"});
+  const q=($("q").value||"").toLowerCase();
+  const box=$("books"); box.innerHTML="";
+  let arr=books.filter(b=>{
+    const text=[b.title,b.author,b.category,b.status,b.tags,b.summary,b.quote,b.memo,b.characters].join(" ").toLowerCase();
+    const okFilter = filter==="all" || (filter==="favorite" && b.favorite==="true") || b.status===filter;
+    return okFilter && text.includes(q);
+  });
+  if(!arr.length){box.innerHTML=`<div class="empty" style="grid-column:1/-1">등록된 작품이 없습니다.</div>`; return;}
+  arr.forEach(b=>{
+    box.innerHTML += `<div class="book" onclick="openDetail(${b.id})">
+      <div class="cover">${b.cover?`<img src="${b.cover}">`:"표지 없음"}</div>
+      <div class="info"><div class="title">${b.favorite==="true"?"⭐ ":""}${esc(b.title||"제목 없음")}</div>
+      <div class="meta">${esc(b.author||"작가 미상")} · ${esc(b.status||"")}</div>
+      <div class="stars">${stars(+b.rating||0)}</div></div>
+    </div>`;
+  });
+}
+function openDetail(id){
+  const b=books.find(x=>x.id===id); if(!b) return;
+  showPage("detail");
+  $("detailBox").innerHTML = `<div class="top">
+    <div class="bigcover cover">${b.cover?`<img src="${b.cover}">`:"표지 없음"}</div>
+    <div>
+      <h1 class="detailTitle">${b.favorite==="true"?"⭐ ":""}${esc(b.title||"제목 없음")}</h1>
+      <div class="line"><b>${esc(b.author||"작가 미상")}</b> 작가</div>
+      <div class="line"><b>${esc(b.category||"-")}</b> 카테고리</div>
+      <div class="line"><b>${esc(b.status||"-")}</b> 상태</div>
+      <div class="line"><b class="stars">${stars(+b.rating||0)}</b> 별점</div>
+      <div class="line"><b>${esc(b.date||"-")}</b> 날짜</div>
+      <div class="line"><b>${esc(b.reread||"0")}회</b> 재탕</div>
+      <div class="line"><b>${esc(b.characters||"-")}</b> 인물/관계</div>
+    </div>
+  </div>
+  <section class="tags">${(b.tags||"").split(" ").filter(Boolean).map(t=>`<span>${esc(t)}</span>`).join("")}</section>
+  <section><h2>줄거리</h2><p style="white-space:pre-line;line-height:1.75">${esc(b.summary||"")}</p></section>
+  <section><h2>명대사 / 공감 글귀</h2><div class="paper">${esc(b.quote||"")}</div></section>
+  <section><h2>개인 감상 / 메모</h2><div class="paper">${esc(b.memo||"")}</div></section>
+  <div class="actions"><button onclick="openForm(${b.id})">수정</button><button class="ghost" onclick="showPage('list')">목록</button></div>`;
+}
+function openForm(id=null){
+  editId=id; currentCover="";
+  showPage("form"); $("formTitle").innerText=id?"작품 수정":"작품 추가"; $("deleteBtn").style.display=id?"block":"none";
+  const b=id?books.find(x=>x.id===id):{};
+  ["title","author","category","status","rating","date","reread","favorite","characters","tags","summary","quote","memo"].forEach(k=>$(k).value=b[k]||"");
+  currentCover=b.cover||"";
+  $("preview").innerHTML=currentCover?`<img src="${currentCover}">`:"이미지 없음";
+  $("coverFile").value="";
+  if($("coverFileName")) $("coverFileName").innerText="선택된 파일 없음";
+}
+function loadImage(e){
+  const file=e.target.files[0]; if(!file) return;
+  if($("coverFileName")) $("coverFileName").innerText=`선택된 파일: ${file.name}`;
+  const reader=new FileReader();
+  reader.onload=()=>{currentCover=reader.result; $("preview").innerHTML=`<img src="${currentCover}">`;};
+  reader.readAsDataURL(file);
+}
+function saveBook(){
+  const b={id:editId||Date.now(),cover:currentCover};
+  ["title","author","category","status","rating","date","reread","favorite","characters","tags","summary","quote","memo"].forEach(k=>b[k]=$(k).value);
+  if(editId) books=books.map(x=>x.id===editId?b:x); else books.unshift(b);
+  save(); showPage("list");
+}
+function deleteBook(){ if(confirm("삭제할까요?")){books=books.filter(x=>x.id!==editId);save();showPage("list");}}
+function renderStats(){
+  const total=books.length, done=books.filter(b=>b.status==="완독").length, fav=books.filter(b=>b.favorite==="true").length;
+  const avg=books.length?(books.reduce((s,b)=>s+(+b.rating||0),0)/books.length).toFixed(1):"0";
+  const cats={}; books.forEach(b=>cats[b.category||"미분류"]=(cats[b.category||"미분류"]||0)+1);
+  const topCat=Object.entries(cats).sort((a,b)=>b[1]-a[1])[0]?.join(" · ")||"-";
+  $("statBox").innerHTML=`<div class="stat"><b>${total}</b><span>전체 작품</span></div>
+  <div class="stat"><b>${done}</b><span>완독 작품</span></div>
+  <div class="stat"><b>${avg}</b><span>평균 별점</span></div>
+  <div class="stat"><b>${fav}</b><span>인생작</span></div>
+  <div class="stat"><b>${topCat}</b><span>가장 많은 카테고리</span></div>`;
+}
+function loadOcrImage(e){
+  const file=e.target.files[0]; if(!file) return;
+  if($("ocrFileName")) $("ocrFileName").innerText=`선택된 파일: ${file.name}`;
+  const reader=new FileReader();
+  reader.onload=()=>{ocrImageData=reader.result; $("ocrPreview").innerHTML=`<img src="${ocrImageData}">`; $("ocrStatus").innerText="이미지가 준비되었습니다. 텍스트 추출을 누르세요."; $("ocrBar").style.width="0%";};
+  reader.readAsDataURL(file);
+}
+async function runOCR(){
+  if(!ocrImageData) return alert("먼저 캡처 이미지를 선택하세요.");
+  if(typeof Tesseract==="undefined") return alert("OCR 라이브러리를 불러오지 못했습니다. 인터넷 연결을 확인하거나 원본 텍스트에 직접 붙여넣어 주세요.");
+  $("ocrStatus").innerText="OCR 준비 중..."; $("ocrBar").style.width="3%";
+  try{
+    const result=await Tesseract.recognize(ocrImageData,"kor+eng",{
+      logger:m=>{
+        if(m.status){$("ocrStatus").innerText=m.status+(m.progress?` ${Math.round(m.progress*100)}%`:"");}
+        if(m.progress) $("ocrBar").style.width=Math.round(m.progress*100)+"%";
+      }
+    });
+    $("ocrText").value=result.data.text.trim();
+    $("ocrStatus").innerText="텍스트 추출 완료. 결과가 어색하면 원본 텍스트를 직접 수정한 뒤 '텍스트 정리'를 누르세요.";
+    $("ocrBar").style.width="100%";
+    parseOcrText();
+  }catch(err){
+    console.error(err);
+    $("ocrStatus").innerText="OCR 실패. 이미지가 흐리거나 라이브러리 로딩 문제일 수 있습니다.";
+    alert("OCR에 실패했습니다. 휴대폰 기본 텍스트 추출 기능으로 복사한 뒤 붙여넣어 주세요.");
+  }
+}
+function cleanLine(s){return String(s||"").replace(/\s+/g," ").trim()}
+function uniq(arr){return [...new Set(arr.filter(Boolean))]}
+function parseOcrText(){
+  const raw=$("ocrText").value||"";
+  if(!raw.trim()) return alert("정리할 텍스트가 없습니다.");
+  const lines=raw.split(/\n+/).map(cleanLine).filter(Boolean);
+  const text=lines.join("\n");
+  let title=lines.find(l=>!/[·•]|보는 중|댓글|^[0-9,.]+|^KT |^완결$/.test(l))||"";
+  let meta=lines.find(l=>/[·•]/.test(l) && /(BL|로맨스|로판|판타지|무협|현판|몽|작가|화|권)/.test(l))||"";
+  let author="", category="";
+  if(meta){
+    const parts=meta.split(/[·•]/).map(cleanLine).filter(Boolean);
+    author=parts[0]||""; category=parts.find(p=>/(BL|로맨스|로판|판타지|무협|현판|GL|드라마)/i.test(p))||"";
+  }
+  const volume=(text.match(/\b\d+\s*(화|권|부|회)\b/)||[])[0]||"";
+  const tagMatches=uniq((text.match(/#[^#\s]+/g)||[]).map(t=>t.replace(/[.,，。]+$/,"")));
+  const chipTags=[];
+  const tagStart=lines.findIndex(l=>l.includes("#") || /(피폐|오해|공|수|가이드|버스|소꿉|친구|후회|굴림|트라우마|미인|정병|개아가)/.test(l));
+  if(tagStart>=0){
+    lines.slice(tagStart).join(" ").split(/\s+/).forEach(w=>{
+      if(/^[가-힣A-Za-z0-9]{2,12}$/.test(w) && /(피폐|오해|공|수|가이드|버스|소꿉|친구|후회|굴림|트라우마|미인|정병|개아가|센가물)/.test(w)) chipTags.push("#"+w);
+    });
+  }
+  const tags=uniq([...tagMatches,...chipTags]).join(" ");
+  const charLines=lines.filter(l=>/^(공|수|남주|여주)\s*[:：]/.test(l));
+  const characters=charLines.join(" / ").replace(/\s+/g," ");
+  const quoteLines=lines.filter(l=>/[“”"‘’']/g.test(l) || /^['"].+/.test(l));
+  const memoLines=lines.filter(l=>/^[-–]/.test(l) || /강압|폭력|주의|계약|문의|연재|완결|감상에 유의|감상에 주의/.test(l));
+  const skipPatterns=[title,meta,...charLines,...quoteLines,...memoLines].filter(Boolean);
+  let summaryLines=[];
+  for(const l of lines){
+    if(skipPatterns.includes(l)) continue;
+    if(/보는 중|댓글|좋아요|^[0-9,.]+|^[♡♥❤]|^#|첫 화 보기|공지|태그|완결|KT |HD|%/.test(l)) continue;
+    if(l.length<8) continue;
+    summaryLines.push(l);
+  }
+  let summary=summaryLines.slice(0,6).join("\n");
+  if(summary.includes("하지만")){ /* keep as is */ }
+  $("exTitle").value=title;
+  $("exAuthor").value=author;
+  $("exCategory").value=category||(/BL/i.test(text)?"BL":"");
+  $("exVolume").value=volume;
+  $("exCharacters").value=characters;
+  $("exTags").value=tags;
+  $("exSummary").value=summary;
+  $("exQuote").value=quoteLines.join("\n");
+  $("exMemo").value=memoLines.join("\n").replace(/^[-–]\s*/gm,"");
+  $("extractMsg").innerText="정리 완료. 틀린 부분은 수정한 뒤 입력폼에 채우세요.";
+}
+function sendExtractToForm(){
+  openForm();
+  $("title").value=$("exTitle").value;
+  $("author").value=$("exAuthor").value;
+  $("category").value=$("exCategory").value;
+  $("status").value=$("exStatus").value;
+  $("characters").value=$("exCharacters").value;
+  $("tags").value=$("exTags").value;
+  $("summary").value=$("exSummary").value;
+  $("quote").value=$("exQuote").value;
+  const vol=$("exVolume").value ? `분량/회차: ${$("exVolume").value}\n` : "";
+  $("memo").value=vol+$("exMemo").value;
+  $("formTitle").innerText="캡처에서 가져온 작품 추가";
+}
+async function copyExtractAll(){
+  const data=`제목: ${$("exTitle").value}\n작가: ${$("exAuthor").value}\n카테고리: ${$("exCategory").value}\n상태: ${$("exStatus").value}\n회차/분량: ${$("exVolume").value}\n인물: ${$("exCharacters").value}\n태그: ${$("exTags").value}\n줄거리:\n${$("exSummary").value}\n\n명대사:\n${$("exQuote").value}\n\n메모:\n${$("exMemo").value}`;
+  try{await navigator.clipboard.writeText(data); $("extractMsg").innerText="전체 정보가 복사되었습니다.";}
+  catch{alert(data);}
+}
+
+function backupFileName(prefix="MyLibrary_backup"){
+  const d=new Date();
+  const pad=n=>String(n).padStart(2,"0");
+  return `${prefix}_${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}_${pad(d.getHours())}-${pad(d.getMinutes())}.json`;
+}
+function backupPayload(){
+  return {books,theme:localStorage.getItem("theme")||"dark",exportedAt:new Date().toISOString(),version:"2.2.1"};
+}
+function downloadJson(data, filename){
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download=filename;
+  a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+function exportData(){
+  downloadJson(backupPayload(), backupFileName());
+}
+async function shareBackup(){
+  const data=backupPayload();
+  const file=new File([JSON.stringify(data,null,2)], backupFileName(), {type:"application/json"});
+  if(navigator.canShare && navigator.canShare({files:[file]}) && navigator.share){
+    try{ await navigator.share({files:[file],title:"My Library 백업",text:"My Library 백업 파일"}); }
+    catch(e){ if(e.name!=="AbortError") exportData(); }
+  }else{
+    alert("이 브라우저에서는 공유 기능을 지원하지 않아 백업 파일을 다운로드합니다.");
+    exportData();
+  }
+}
+function importData(e){
+  const file=e.target.files[0]; if(!file) return;
+  if($("importFileName")) $("importFileName").innerText=`선택된 파일: ${file.name}`;
+  if(books.length){
+    downloadJson(backupPayload(), backupFileName("MyLibrary_restore_before_backup"));
+  }
+  const r=new FileReader();
+  r.onload=()=>{try{
+    const data=JSON.parse(r.result);
+    if(!Array.isArray(data.books)) throw new Error("books 없음");
+    books=data.books||[];
+    if(data.theme) localStorage.setItem("theme",data.theme);
+    save(); applyTheme(); alert("복원 완료"); showPage("list");
+    $("importFile").value="";
+  }catch{alert("복원 실패: JSON 파일을 확인하세요."); $("importFile").value="";}};
+  r.readAsText(file);
+}
+function esc(s){return String(s||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]))}
+
+boot();
+</script>
+</body>
+</html>
